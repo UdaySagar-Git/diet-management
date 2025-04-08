@@ -1,11 +1,11 @@
-import { Image, ScrollView, View } from "react-native";
+import { ScrollView, View } from "react-native";
 
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
-import { useSupabase } from "@/context/supabase-provider";
+import { useAuth } from "@/context/auth-provider";
 
 const Profile = () => {
-	const { user, signOut } = useSupabase();
+	const { user, signOut } = useAuth();
 
 	const formatDate = (dateString: string) => {
 		return new Date(dateString).toLocaleDateString();
@@ -17,15 +17,14 @@ const Profile = () => {
 				<View className="mb-6 w-full rounded-xl bg-card p-6 shadow-lg">
 					<InfoItem
 						label="Name"
-						value={user?.user_metadata?.name || "Not set"}
+						value={user?.name || "Not set"}
 					/>
 					<InfoItem
 						label="Username"
-						value={user?.user_metadata?.username || "Not set"}
+						value={user?.username || "Not set"}
 					/>
 					<InfoItem label="Email" value={user?.email || "Not set"} />
 					<InfoItem label="Role" value={user?.role || "Not set"} />
-					<InfoItem label="Phone" value={user?.phone || "Not set"} />
 					<InfoItem
 						label="Member since"
 						value={user?.created_at ? formatDate(user.created_at) : "Not set"}
