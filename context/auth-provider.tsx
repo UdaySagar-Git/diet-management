@@ -33,15 +33,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const dummyUser: User = {
     id: "1",
-    email: "user@example.com",
-    name: "John Doe",
-    username: "johndoe",
+    email: "user@gmail.com",
+    name: "User",
+    username: "user",
     role: "user",
     created_at: new Date().toISOString(),
   };
 
   const signIn = async (email: string, password: string) => {
-    if (email === "user@example.com" && password === "password123") {
+    if (email === "user@gmail.com" && password === "password123") {
       setUser(dummyUser);
       router.replace("/(app)/(protected)/home");
     } else {

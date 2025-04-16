@@ -8,6 +8,7 @@ import { useEffect } from "react";
 import { BarChart, LineChart } from "react-native-chart-kit";
 import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/lib/useColorScheme";
+import { useHealth } from "@/context/health-context";
 
 const StepsPage = () => {
 	const { colorScheme } = useColorScheme();
@@ -18,38 +19,32 @@ const StepsPage = () => {
 	const primaryColor = isDark ? colors.dark.primary : colors.light.primary;
 
 	const progress = useSharedValue(0);
-	const dailySteps = "6,543";
-	const dailyTarget = "10,000";
+	const { getTodaySteps, getWeeklyStepsData, getMonthlyStepsData } = useHealth();
+	const dailySteps = getTodaySteps();
+	const dailyTarget = 10000;
 
 	const weeklyData = {
-		labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+		labels: getWeeklyStepsData().labels,
 		datasets: [
 			{
-				data: [8432, 10243, 7654, 9876, 6543, 8765, 9234],
+				data: getWeeklyStepsData().data,
 				color: (opacity = 1) => `rgba(147, 51, 234, ${opacity})`,
 			},
 		],
 	};
 
 	const monthlyData = {
-		labels: ["1w", "2w", "3w", "4w"],
-		datasets: [
-			{
-				data: [45678, 52345, 48765, 51234],
-			},
-		],
+		labels: getMonthlyStepsData().labels,
+		datasets: [{ data: getMonthlyStepsData().data }],
 	};
 
 	useEffect(() => {
-		const numValue = Number(dailySteps.replace(/[^0-9.]/g, ""));
-		const numTarget = Number(dailyTarget.replace(/[^0-9.]/g, ""));
-		const calculatedProgress = (numValue / numTarget) * 100;
-
+		const calculatedProgress = (dailySteps / dailyTarget) * 100;
 		progress.value = withSpring(calculatedProgress, {
 			damping: 15,
 			stiffness: 100,
 		});
-	}, [dailySteps, dailyTarget]);
+	}, [dailySteps]);
 
 	const chartConfig = {
 		backgroundColor: "transparent",
@@ -83,10 +78,10 @@ const StepsPage = () => {
 					</Text>
 					<View className="items-center mt-6">
 						<Text className="text-4xl font-bold text-primary">
-							{dailySteps}
+							{dailySteps.toLocaleString()}
 						</Text>
 						<Text className="text-sm text-muted-foreground mt-2">
-							Goal: {dailyTarget} steps
+							Goal: {dailyTarget.toLocaleString()} steps
 						</Text>
 						<Progress value={progress.value} className="mt-4 h-3 w-full" />
 					</View>
@@ -131,7 +126,7 @@ const StepsPage = () => {
 					/>
 				</Card>
 
-				<Button className="h-14 bg-primary w-full" onPress={() => {}}>
+				<Button className="h-14 bg-primary w-full" onPress={() => { }}>
 					<Text className="text-primary-foreground font-semibold text-base">
 						Sync with Health App
 					</Text>

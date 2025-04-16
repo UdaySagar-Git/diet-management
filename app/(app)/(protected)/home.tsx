@@ -1,4 +1,4 @@
-import { ScrollView, View } from "react-native";
+import { ScrollView, View, Pressable } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { Dimensions } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,6 +8,7 @@ import Animated, {
 	withSpring,
 	useSharedValue,
 } from "react-native-reanimated";
+import { useRouter } from "expo-router";
 
 import { Button } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
@@ -15,6 +16,7 @@ import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/lib/useColorScheme";
+import { useHealth } from "@/context/health-context";
 
 const Home = () => {
 	const { colorScheme } = useColorScheme();
@@ -23,14 +25,20 @@ const Home = () => {
 		? colors.dark.foreground
 		: colors.light.foreground;
 	const primaryColor = isDark ? colors.dark.primary : colors.light.primary;
+	const router = useRouter();
+	const {
+		getTodaySteps,
+		getTodayWater,
+		getLatestWeight,
+		getWeeklyWeightData,
+	} = useHealth();
 
+	const dailySteps = getTodaySteps();
+	const dailyWater = getTodayWater();
+	const latestWeight = getLatestWeight();
 	const weightData = {
-		labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-		datasets: [
-			{
-				data: [80, 79, 78, 77.5, 77, 76.5],
-			},
-		],
+		labels: getWeeklyWeightData().labels,
+		datasets: [{ data: getWeeklyWeightData().data }],
 	};
 
 	return (
@@ -41,24 +49,30 @@ const Home = () => {
 						Today's Progress
 					</Text>
 					<View className="flex-row justify-between">
-						<StatsCard
-							icon="footsteps-outline"
-							value="6,543"
-							label="Steps"
-							target="10,000"
-						/>
-						<StatsCard
-							icon="flame-outline"
-							value="1,200"
-							label="Calories"
-							target="2,000"
-						/>
-						<StatsCard
-							icon="water-outline"
-							value="1.5L"
-							label="Water"
-							target="2.5L"
-						/>
+						<Pressable onPress={() => router.push("/steps")}>
+							<StatsCard
+								icon="footsteps-outline"
+								value={dailySteps.toLocaleString()}
+								label="Steps"
+								target="10,000"
+							/>
+						</Pressable>
+						<Pressable onPress={() => router.push("/meals")}>
+							<StatsCard
+								icon="flame-outline"
+								value="1,200"
+								label="Calories"
+								target="2,000"
+							/>
+						</Pressable>
+						<Pressable onPress={() => router.push("/water")}>
+							<StatsCard
+								icon="water-outline"
+								value={`${(dailyWater / 1000).toFixed(1)}L`}
+								label="Water"
+								target="2.5L"
+							/>
+						</Pressable>
 					</View>
 				</Card>
 
@@ -117,13 +131,20 @@ const Home = () => {
 					</View>
 				</Card>
 
-				<View className="flex-row justify-between space-x-4">
-					<Button className="flex-1 h-14 bg-primary" onPress={() => {}}>
+				<View className="flex-row justify-between mb-4">
+					<Button
+						className="flex-1 h-14 bg-primary mr-4"
+						onPress={() => router.push("/meals")}
+					>
 						<Text className="text-primary-foreground font-semibold text-base">
 							Log Meal
 						</Text>
 					</Button>
-					<Button className="flex-1 h-14" variant="outline" onPress={() => {}}>
+					<Button
+						className="flex-1 h-14"
+						variant="outline"
+						onPress={() => router.push("/weight")}
+					>
 						<Text className="font-semibold text-base">Log Weight</Text>
 					</Button>
 				</View>

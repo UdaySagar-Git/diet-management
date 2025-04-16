@@ -105,12 +105,27 @@ const ProtectedLayout = () => {
 				}}
 			/>
 			<Tabs.Screen
+				name="water"
+				options={{
+					title: "Water",
+					tabBarIcon: ({ color, size }) => (
+						<Ionicons name="water-outline" size={size} color={color} />
+					),
+				}}
+			/>
+			<Tabs.Screen
 				name="profile"
 				options={{
 					title: "Profile",
 					tabBarIcon: ({ color, size }) => (
 						<Ionicons name="person-outline" size={size} color={color} />
 					),
+				}}
+			/>
+			<Tabs.Screen
+				name="water-goal"
+				options={{
+					href: null,
 				}}
 			/>
 		</Tabs>

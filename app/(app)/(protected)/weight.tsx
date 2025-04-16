@@ -1,10 +1,12 @@
-import { ScrollView, View, Dimensions } from "react-native";
+import { ScrollView, View, TextInput, Dimensions } from "react-native";
 import { Card } from "@/components/ui/card";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
 import { LineChart } from "react-native-chart-kit";
 import { colors } from "@/constants/colors";
 import { useColorScheme } from "@/lib/useColorScheme";
+import { useState } from "react";
+import { useHealth } from "@/context/health-context";
 
 const WeightPage = () => {
 	const { colorScheme } = useColorScheme();
@@ -12,23 +14,28 @@ const WeightPage = () => {
 	const foregroundColor = isDark
 		? colors.dark.foreground
 		: colors.light.foreground;
+	const [weight, setWeight] = useState("");
+	const {
+		addWeight,
+		getLatestWeight,
+		getWeeklyWeightData,
+		getMonthlyWeightData,
+	} = useHealth();
 
+	const latestWeight = getLatestWeight();
 	const weeklyData = {
-		labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
-		datasets: [
-			{
-				data: [76.5, 76.3, 76.4, 76.2, 76.0, 75.8, 75.7],
-			},
-		],
+		labels: getWeeklyWeightData().labels,
+		datasets: [{ data: getWeeklyWeightData().data }],
+	};
+	const monthlyData = {
+		labels: getMonthlyWeightData().labels,
+		datasets: [{ data: getMonthlyWeightData().data }],
 	};
 
-	const monthlyData = {
-		labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
-		datasets: [
-			{
-				data: [80, 79, 78, 77.5, 77, 76.5],
-			},
-		],
+	const handleLogWeight = async () => {
+		if (!weight) return;
+		await addWeight({ weight: parseFloat(weight) });
+		setWeight("");
 	};
 
 	const chartConfig = {
@@ -50,11 +57,42 @@ const WeightPage = () => {
 		<ScrollView className="flex-1 bg-background">
 			<View className="px-4 py-6 space-y-6">
 				<Card className="p-6 bg-card">
+					<Text className="text-2xl font-bold text-foreground mb-6">
+						Log Weight
+					</Text>
+					<View className="space-y-4">
+						<View>
+							<Text className="text-lg font-semibold text-foreground mb-2">
+								Weight (kg)
+							</Text>
+							<TextInput
+								className="bg-muted rounded-lg p-4 text-foreground"
+								placeholder="Enter weight in kg"
+								keyboardType="numeric"
+								value={weight}
+								onChangeText={setWeight}
+							/>
+						</View>
+
+						<Button
+							className="h-14 bg-primary w-full"
+							onPress={handleLogWeight}
+						>
+							<Text className="text-primary-foreground font-semibold text-base">
+								Log Weight
+							</Text>
+						</Button>
+					</View>
+				</Card>
+
+				<Card className="p-6 bg-card">
 					<Text className="text-2xl font-bold text-foreground">
 						Current Weight
 					</Text>
 					<View className="items-center mt-6">
-						<Text className="text-4xl font-bold text-primary">75.7 kg</Text>
+						<Text className="text-4xl font-bold text-primary">
+							{latestWeight ? `${latestWeight} kg` : "No data"}
+						</Text>
 						<Text className="text-sm text-muted-foreground mt-2">
 							Goal: 73.0 kg
 						</Text>
@@ -94,12 +132,6 @@ const WeightPage = () => {
 						}}
 					/>
 				</Card>
-
-				<Button className="h-14 bg-primary w-full" onPress={() => {}}>
-					<Text className="text-primary-foreground font-semibold text-base">
-						Log New Weight
-					</Text>
-				</Button>
 			</View>
 		</ScrollView>
 	);

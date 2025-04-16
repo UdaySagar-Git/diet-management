@@ -1,12 +1,15 @@
 import "../global.css";
 
-import { Slot } from "expo-router";
+import { Stack } from "expo-router";
 import { AuthProvider } from "@/context/auth-provider";
+import { HealthProvider } from "@/context/health-context";
 
-export default function AppLayout() {
+export default function RootLayout() {
 	return (
 		<AuthProvider>
-			<Slot />
+			<HealthProvider>
+				<Stack screenOptions={{ headerShown: false }} />
+			</HealthProvider>
 		</AuthProvider>
 	);
 }

@@ -1,7 +1,9 @@
-import { ScrollView, View } from "react-native";
+import { ScrollView, View, TextInput } from "react-native";
 import { Card } from "@/components/ui/card";
 import { Text } from "@/components/ui/text";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useHealth } from "@/context/health-context";
 
 const MealCard = ({
 	mealType,
@@ -29,40 +31,106 @@ const MealCard = ({
 );
 
 const MealsPage = () => {
+	const [mealType, setMealType] = useState("");
+	const [calories, setCalories] = useState("");
+	const [description, setDescription] = useState("");
+	const { addMeal, getTodayMeals } = useHealth();
+	const todayMeals = getTodayMeals();
+
+	const handleLogMeal = async () => {
+		if (!mealType || !calories) return;
+		await addMeal({
+			type: mealType,
+			calories: parseFloat(calories),
+			description,
+		});
+		setMealType("");
+		setCalories("");
+		setDescription("");
+	};
+
 	return (
 		<ScrollView className="flex-1 bg-background">
 			<View className="px-4 py-6 space-y-6">
 				<Card className="p-6 bg-card">
 					<Text className="text-2xl font-bold text-foreground mb-6">
-						Today's Meal Plan
+						Log New Meal
 					</Text>
 					<View className="space-y-4">
-						<MealCard
-							mealType="Breakfast"
-							calories="400"
-							suggestion="Oatmeal with berries and nuts"
-							time="8:00 AM"
-						/>
-						<MealCard
-							mealType="Lunch"
-							calories="600"
-							suggestion="Grilled chicken salad"
-							time="1:00 PM"
-						/>
-						<MealCard
-							mealType="Dinner"
-							calories="500"
-							suggestion="Baked salmon with vegetables"
-							time="7:00 PM"
-						/>
+						<View>
+							<Text className="text-lg font-semibold text-foreground mb-2">
+								Meal Type
+							</Text>
+							<TextInput
+								className="bg-muted rounded-lg p-4 text-foreground"
+								placeholder="e.g., Breakfast, Lunch, Dinner"
+								value={mealType}
+								onChangeText={setMealType}
+							/>
+						</View>
+
+						<View>
+							<Text className="text-lg font-semibold text-foreground mb-2">
+								Calories
+							</Text>
+							<TextInput
+								className="bg-muted rounded-lg p-4 text-foreground"
+								placeholder="Enter calories"
+								keyboardType="numeric"
+								value={calories}
+								onChangeText={setCalories}
+							/>
+						</View>
+
+						<View>
+							<Text className="text-lg font-semibold text-foreground mb-2">
+								Description
+							</Text>
+							<TextInput
+								className="bg-muted rounded-lg p-4 text-foreground"
+								placeholder="Describe your meal"
+								multiline
+								numberOfLines={3}
+								value={description}
+								onChangeText={setDescription}
+							/>
+						</View>
+
+						<Button
+							className="h-14 bg-primary w-full"
+							onPress={handleLogMeal}
+						>
+							<Text className="text-primary-foreground font-semibold text-base">
+								Log Meal
+							</Text>
+						</Button>
 					</View>
 				</Card>
 
-				<Button className="h-14 bg-primary w-full" onPress={() => {}}>
-					<Text className="text-primary-foreground font-semibold text-base">
-						Log New Meal
+				<Card className="p-6 bg-card">
+					<Text className="text-2xl font-bold text-foreground mb-6">
+						Today's Meals
 					</Text>
-				</Button>
+					<View className="space-y-4">
+						{todayMeals.map((meal) => (
+							<MealCard
+								key={meal.id}
+								mealType={meal.type}
+								calories={meal.calories.toString()}
+								suggestion={meal.description}
+								time={new Date(meal.timestamp).toLocaleTimeString([], {
+									hour: "2-digit",
+									minute: "2-digit",
+								})}
+							/>
+						))}
+						{todayMeals.length === 0 && (
+							<Text className="text-center text-muted-foreground">
+								No meals logged today
+							</Text>
+						)}
+					</View>
+				</Card>
 			</View>
 		</ScrollView>
 	);
